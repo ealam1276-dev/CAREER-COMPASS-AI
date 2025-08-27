@@ -1,0 +1,1245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CareerCompass AI Dashboard</title>
+    <!-- Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter for a clean look -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- jsPDF for PDF generation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        /* Custom styles */
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(-45deg, #111827, #1f2937, #374151, #4b5563);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+        }
+
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .glass-effect {
+            background: rgba(31, 41, 55, 0.6);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .feature-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            display: flex;
+            flex-direction: column;
+        }
+        .feature-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 30px rgba(0,0,0,0.3);
+        }
+        .feature-card-content {
+            flex-grow: 1;
+        }
+        /* Style for the motivation gauge */
+        .gauge-container {
+            position: relative;
+            width: 150px;
+            height: 75px;
+            overflow: hidden;
+        }
+        .gauge-background, .gauge-fill {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 200%;
+            border-radius: 50%;
+            border: 20px solid;
+        }
+        .gauge-background {
+            border-color: #374151; /* gray-700 */
+        }
+        .gauge-fill {
+            border-color: #f59e0b; /* amber-500 */
+            clip: rect(0, 150px, 150px, 75px);
+            transform: rotate(0deg);
+            transition: transform 1s ease-in-out;
+        }
+        /* Modal UI Styles */
+        .modal.hidden { display: none; }
+        
+        /* AI Avatar Style */
+        .avatar-speaking circle {
+            animation: speak 0.7s infinite alternate;
+        }
+        @keyframes speak {
+            from { r: 40; opacity: 0.8; }
+            to { r: 45; opacity: 1; }
+        }
+    </style>
+</head>
+<body class="text-gray-200">
+
+    <div id="mainDashboard" class="container mx-auto px-4 py-8 md:py-12 max-w-7xl">
+
+        <!-- Header Section -->
+        <header class="text-center mb-12">
+            <div class="flex justify-center items-center mb-4">
+                <!-- Team Logo Placeholder -->
+                <svg width="60" height="60" viewBox="0 0 24 24" class="mr-4">
+                    <defs>
+                        <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#a78bfa;stop-opacity:1" />
+                            <stop offset="100%" style="stop-color:#3b82f6;stop-opacity:1" />
+                        </linearGradient>
+                    </defs>
+                    <path fill="url(#logoGradient)" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1.5 14.5L6 12l1.5-1.5L10.5 13l6-6L18 8.5 10.5 16.5z"/>
+                </svg>
+                <div>
+                    <h1 class="text-4xl md:text-5xl font-bold text-white tracking-tight" data-lang-key="title">CareerCompass AI</h1>
+                    <p class="text-sm text-gray-400">by AI Navigators</p>
+                </div>
+                <div class="ml-6">
+                    <select id="languageSwitcher" class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 p-2">
+                        <option value="en">English</option>
+                        <option value="hi">हिन्दी</option>
+                    </select>
+                </div>
+            </div>
+            <p class="text-lg text-gray-300" data-lang-key="subtitle">Your personal AI-powered career toolkit.</p>
+        </header>
+
+        <!-- Features Grid -->
+        <main class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+            
+             <!-- Tool 1: Career Assessment -->
+            <div class="glass-effect rounded-2xl p-6 shadow-2xl feature-card">
+                <div class="feature-card-content">
+                    <div class="flex items-center mb-4">
+                        <i class="fas fa-tasks text-3xl text-purple-400 mr-4"></i>
+                        <h2 class="text-2xl font-bold text-white" data-lang-key="assessment_title">Career Assessment Test</h2>
+                    </div>
+                    <p class="text-gray-400 mb-4" data-lang-key="assessment_desc">Take a conversational quiz to discover the best career paths based on your personality and interests.</p>
+                </div>
+                <button id="startAssessmentBtn" class="mt-4 w-full bg-purple-600 text-white font-semibold py-3 px-6 rounded-lg hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-purple-500 transition-transform transform hover:scale-105 duration-300">
+                    <span data-lang-key="assessment_button">Start Assessment</span>
+                </button>
+            </div>
+
+            <!-- Tool 2: Career Path Finder -->
+            <div class="glass-effect rounded-2xl p-6 shadow-2xl feature-card">
+                <div class="feature-card-content">
+                    <div class="flex items-center mb-4">
+                        <i class="fas fa-route text-3xl text-indigo-400 mr-4"></i>
+                        <h2 class="text-2xl font-bold text-white" data-lang-key="finder_title">Career Path Finder</h2>
+                    </div>
+                    <p class="text-gray-400 mb-4" data-lang-key="finder_desc">Explore personalized career roadmaps based on your skills and interests.</p>
+                    <label for="userInput" class="block text-md font-semibold mb-2 text-gray-300" data-lang-key="finder_label">Enter your details here:</label>
+                    <textarea id="userInput" rows="4" class="w-full bg-gray-900/50 border border-gray-600 rounded-lg p-3 text-gray-200 focus:ring-2 focus:ring-indigo-500 transition duration-300 placeholder-gray-500" data-lang-placeholder="finder_placeholder"></textarea>
+                </div>
+                <button id="generateBtn" class="mt-4 w-full bg-indigo-600 text-white font-semibold py-3 px-6 rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-indigo-500 transition-transform transform hover:scale-105 duration-300">
+                    <span data-lang-key="finder_button">Chart My Path</span>
+                </button>
+            </div>
+
+            <!-- Tool 3: Resume Builder & Scorer -->
+            <div class="glass-effect rounded-2xl p-6 shadow-2xl feature-card">
+                <div class="feature-card-content">
+                    <div class="flex items-center mb-4">
+                        <i class="fas fa-file-invoice text-3xl text-green-400 mr-4"></i>
+                        <h2 class="text-2xl font-bold text-white" data-lang-key="resume_title">Resume Builder & Scorer</h2>
+                    </div>
+                    <p class="text-gray-400 mb-4" data-lang-key="resume_desc">Provide your details in points, and the AI will build a professional resume and give it an ATS score.</p>
+                    <label for="resumeInput" class="block text-md font-semibold mb-2 text-gray-300" data-lang-key="resume_label">Enter your details here:</label>
+                    <textarea id="resumeInput" rows="4" class="w-full bg-gray-900/50 border border-gray-600 rounded-lg p-3 text-gray-200 focus:ring-2 focus:ring-green-500 transition duration-300 placeholder-gray-500" data-lang-placeholder="resume_placeholder"></textarea>
+                </div>
+                <button id="generateResumeBtn" class="mt-4 w-full bg-green-600 text-white font-semibold py-3 px-6 rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-green-500 transition-transform transform hover:scale-105 duration-300">
+                    <span data-lang-key="resume_button">Build & Score Resume</span>
+                </button>
+            </div>
+
+            <!-- Tool 4: Detailed Roadmap Generator -->
+            <div class="glass-effect rounded-2xl p-6 shadow-2xl feature-card">
+                <div class="feature-card-content">
+                    <div class="flex items-center mb-4">
+                        <i class="fas fa-map-signs text-3xl text-blue-400 mr-4"></i>
+                        <h2 class="text-2xl font-bold text-white" data-lang-key="roadmap_title">Detailed Roadmap Generator</h2>
+                    </div>
+                    <p class="text-gray-400 mb-4" data-lang-key="roadmap_desc">Get a step-by-step learning plan from beginner to advanced for any career role.</p>
+                    <label for="roadmapInput" class="block text-md font-semibold mb-2 text-gray-300" data-lang-key="roadmap_label">Enter Career Role:</label>
+                    <textarea id="roadmapInput" rows="4" class="w-full bg-gray-900/50 border border-gray-600 rounded-lg p-3 text-gray-200 focus:ring-2 focus:ring-blue-500 transition duration-300 placeholder-gray-500" data-lang-placeholder="roadmap_placeholder"></textarea>
+                </div>
+                <button id="generateRoadmapBtn" class="mt-4 w-full bg-blue-600 text-white font-semibold py-3 px-6 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-blue-500 transition-transform transform hover:scale-105 duration-300">
+                    <span data-lang-key="roadmap_button">Generate Roadmap</span>
+                </button>
+            </div>
+
+            <!-- Tool 5: Live Job Listings -->
+            <div class="glass-effect rounded-2xl p-6 shadow-2xl feature-card">
+                 <div class="feature-card-content">
+                    <div class="flex items-center mb-4">
+                        <i class="fas fa-briefcase text-3xl text-cyan-400 mr-4"></i>
+                        <h2 class="text-2xl font-bold text-white" data-lang-key="jobs_title">Live Job Listings</h2>
+                    </div>
+                    <p class="text-gray-400 mb-4" data-lang-key="jobs_desc">See real-time job and internship openings that match your skills.</p>
+                    <label for="jobInput" class="block text-md font-semibold mb-2 text-gray-300" data-lang-key="jobs_label">Enter Target Role & Skills:</label>
+                    <textarea id="jobInput" rows="4" class="w-full bg-gray-900/50 border border-gray-600 rounded-lg p-3 text-gray-200 focus:ring-2 focus:ring-cyan-500 transition duration-300 placeholder-gray-500" data-lang-placeholder="jobs_placeholder"></textarea>
+                </div>
+                <button id="findJobsBtn" class="mt-4 w-full bg-cyan-600 text-white font-semibold py-3 px-6 rounded-lg hover:bg-cyan-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-cyan-500 transition-transform transform hover:scale-105 duration-300">
+                    <span data-lang-key="jobs_button">Find Jobs</span>
+                </button>
+            </div>
+            
+            <!-- Tool 6: Daily Check-in & Motivation -->
+            <div class="glass-effect rounded-2xl p-6 shadow-2xl feature-card">
+                 <div class="feature-card-content">
+                    <div class="flex items-center mb-4">
+                        <i class="fas fa-heart-pulse text-3xl text-yellow-400 mr-4"></i>
+                        <h2 class="text-2xl font-bold text-white" data-lang-key="checkin_title">Daily Check-in & Motivation</h2>
+                    </div>
+                    <p class="text-gray-400 mb-4" data-lang-key="checkin_desc">Share how your day was and get personal motivation and a motivation score from the AI.</p>
+                    <label for="checkinInput" class="block text-md font-semibold mb-2 text-gray-300" data-lang-key="checkin_label">How was your day today?</label>
+                    <textarea id="checkinInput" rows="4" class="w-full bg-gray-900/50 border border-gray-600 rounded-lg p-3 text-gray-200 focus:ring-2 focus:ring-yellow-500 transition duration-300 placeholder-gray-500" data-lang-placeholder="checkin_placeholder"></textarea>
+                </div>
+                <button id="checkinBtn" class="mt-4 w-full bg-yellow-600 text-white font-semibold py-3 px-6 rounded-lg hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-yellow-500 transition-transform transform hover:scale-105 duration-300">
+                    <span data-lang-key="checkin_button">Get Motivation</span>
+                </button>
+            </div>
+
+            <!-- Tool 7: AI Mock Interview -->
+            <div class="glass-effect rounded-2xl p-6 shadow-2xl feature-card">
+                 <div class="feature-card-content">
+                    <div class="flex items-center mb-4">
+                        <i class="fas fa-microphone-alt text-3xl text-amber-400 mr-4"></i>
+                        <h2 class="text-2xl font-bold text-white" data-lang-key="interview_title">AI Mock Interview</h2>
+                    </div>
+                    <p class="text-gray-400 mb-4" data-lang-key="interview_desc">Practice for interviews in real-time and get instant feedback on your communication and answers.</p>
+                    <label for="interviewInput" class="block text-md font-semibold mb-2 text-gray-300" data-lang-key="interview_label">Enter Interview Role:</label>
+                    <textarea id="interviewInput" rows="4" class="w-full bg-gray-900/50 border border-gray-600 rounded-lg p-3 text-gray-200 focus:ring-2 focus:ring-amber-500 transition duration-300 placeholder-gray-500" data-lang-placeholder="interview_placeholder"></textarea>
+                </div>
+                <button id="startInterviewBtn" class="mt-4 w-full bg-amber-600 text-white font-semibold py-3 px-6 rounded-lg hover:bg-amber-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-amber-500 transition-transform transform hover:scale-105 duration-300">
+                    <span data-lang-key="interview_button">Start Interview</span>
+                </button>
+            </div>
+
+            <!-- Tool 8: My Progress & Badges -->
+            <div class="glass-effect rounded-2xl p-6 shadow-2xl feature-card">
+                <div class="feature-card-content">
+                   <div class="flex items-center mb-4">
+                       <i class="fas fa-trophy text-3xl text-orange-400 mr-4"></i>
+                       <h2 class="text-2xl font-bold text-white" data-lang-key="progress_title">My Progress & Badges</h2>
+                   </div>
+                   <p class="text-gray-400 mb-4" data-lang-key="progress_desc">Track your learning journey, unlock badges, and visualize your skill growth.</p>
+                </div>
+               <button id="progressBtn" class="mt-4 w-full bg-orange-600 text-white font-semibold py-3 px-6 rounded-lg hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-orange-500 transition-transform transform hover:scale-105 duration-300">
+                   <span data-lang-key="progress_button">View My Progress</span>
+               </button>
+           </div>
+           
+           <!-- Tool 9: Community Hub -->
+            <div class="glass-effect rounded-2xl p-6 shadow-2xl feature-card">
+                <div class="feature-card-content">
+                   <div class="flex items-center mb-4">
+                       <i class="fas fa-users text-3xl text-rose-400 mr-4"></i>
+                       <h2 class="text-2xl font-bold text-white" data-lang-key="community_title">Community Hub</h2>
+                   </div>
+                   <p class="text-gray-400 mb-4" data-lang-key="community_desc">Ask career-related questions and get insightful answers from an AI mentor.</p>
+                    <label for="communityInput" class="block text-md font-semibold mb-2 text-gray-300" data-lang-key="community_label">Ask a question:</label>
+                    <textarea id="communityInput" rows="4" class="w-full bg-gray-900/50 border border-gray-600 rounded-lg p-3 text-gray-200 focus:ring-2 focus:ring-rose-500 transition duration-300 placeholder-gray-500" data-lang-placeholder="community_placeholder"></textarea>
+                </div>
+               <button id="communityBtn" class="mt-4 w-full bg-rose-600 text-white font-semibold py-3 px-6 rounded-lg hover:bg-rose-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-rose-500 transition-transform transform hover:scale-105 duration-300">
+                   <span data-lang-key="community_button">Ask AI Mentor</span>
+               </button>
+           </div>
+
+        </main>
+
+        <!-- Output Section -->
+        <div id="output-section" class="mt-10">
+            <div id="loader" class="text-center py-10 hidden">
+                <svg class="animate-spin h-8 w-8 text-indigo-500 mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                <p class="mt-4 text-gray-400" data-lang-key="loading_text">Analyzing...</p>
+            </div>
+            <div id="errorMessage" class="hidden mt-8 bg-red-900/50 border border-red-500 text-red-300 px-4 py-3 rounded-lg" role="alert"></div>
+            <div id="output" class="hidden"></div>
+        </div>
+    </div>
+
+    <!-- Modal UIs -->
+    <div id="interviewUI" class="modal hidden fixed inset-0 bg-gray-900 bg-opacity-90 backdrop-blur-sm flex flex-col items-center justify-center p-4 z-50">
+        <div class="w-full max-w-3xl text-center">
+            <div class="mb-4">
+                <svg id="aiAvatar" width="100" height="100" viewBox="0 0 100 100" class="mx-auto">
+                    <circle cx="50" cy="50" r="40" fill="#2563eb" />
+                    <circle cx="50" cy="50" r="30" fill="#3b82f6" />
+                    <circle cx="50" cy="50" r="20" fill="#60a5fa" />
+                </svg>
+            </div>
+            <h2 class="text-3xl font-bold text-white mb-4" id="interviewRoleTitle"></h2>
+            <div id="aiSpeechBubble" class="glass-effect rounded-2xl p-6 mb-6 min-h-[100px] flex items-center justify-center">
+                <p id="aiSpeechText" class="text-xl text-amber-300 italic"></p>
+            </div>
+            <div class="mb-6">
+                <button id="answerBtn" class="bg-amber-600 text-white rounded-full w-24 h-24 flex items-center justify-center mx-auto transition-transform transform hover:scale-110">
+                    <i id="micIcon" class="fas fa-microphone text-4xl"></i>
+                </button>
+                <p id="listeningStatus" class="text-gray-400 mt-2" data-lang-key="listening_status_idle"></p>
+            </div>
+            <div class="glass-effect rounded-2xl p-6 min-h-[150px]">
+                <h3 class="text-lg font-semibold text-white mb-2" data-lang-key="your_answer_title">Your Answer:</h3>
+                <p id="userAnswerText" class="text-gray-300"></p>
+            </div>
+            <button id="endInterviewBtn" class="mt-8 bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg">
+                <span data-lang-key="end_interview_button">End Interview</span>
+            </button>
+        </div>
+    </div>
+    <div id="assessmentUI" class="modal hidden fixed inset-0 bg-gray-900 bg-opacity-90 backdrop-blur-sm flex flex-col items-center justify-center p-4 z-50">
+        <div class="w-full max-w-3xl">
+            <div class="glass-effect rounded-2xl p-8">
+                <div class="mb-4">
+                    <div class="w-full bg-gray-700 rounded-full h-2.5">
+                        <div id="assessmentProgressBar" class="bg-purple-600 h-2.5 rounded-full" style="width: 0%"></div>
+                    </div>
+                </div>
+                <h2 class="text-2xl font-bold text-white mb-4" id="assessmentQuestion"></h2>
+                <textarea id="assessmentAnswer" rows="5" class="w-full bg-gray-900/50 border border-gray-600 rounded-lg p-3 text-gray-200 focus:ring-2 focus:ring-purple-500 transition duration-300" placeholder="Type your answer here..."></textarea>
+                <div class="flex justify-between mt-6">
+                    <button id="endAssessmentBtn" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg">
+                        <span data-lang-key="end_assessment_button">End Assessment</span>
+                    </button>
+                    <button id="nextQuestionBtn" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-lg">
+                        <span data-lang-key="next_question_button">Next Question</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="progressUI" class="modal hidden fixed inset-0 bg-gray-900 bg-opacity-90 backdrop-blur-sm flex flex-col items-center justify-center p-4 z-50">
+        <div class="w-full max-w-4xl">
+            <div class="glass-effect rounded-2xl p-8 max-h-[90vh] overflow-y-auto">
+                <div class="flex justify-between items-center mb-6">
+                     <h2 class="text-3xl font-bold text-white" data-lang-key="progress_header">My Learning Progress</h2>
+                     <button id="closeProgressBtn" class="text-gray-400 hover:text-white text-3xl">&times;</button>
+                </div>
+                <div id="progressContent"></div>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        // --- LANGUAGE TRANSLATIONS ---
+        const translations = {
+            en: {
+                title: "CareerCompass AI",
+                subtitle: "Your personal AI-powered career toolkit.",
+                finder_title: "Career Path Finder",
+                finder_desc: "Explore personalized career roadmaps based on your skills and interests.",
+                finder_label: "Enter your details here:",
+                finder_placeholder: "e.g., 'B.Tech CSE student, skills in Java, Python...'",
+                finder_button: "Chart My Path",
+                resume_title: "Resume Builder & Scorer",
+                resume_desc: "Provide your details in points, and the AI will build a professional resume and give it an ATS score.",
+                resume_label: "Enter your details here:",
+                resume_placeholder: "e.g., 'Skills: Python, React. Project: Built an e-commerce site...'",
+                resume_button: "Build & Score Resume",
+                roadmap_title: "Detailed Roadmap Generator",
+                roadmap_desc: "Get a step-by-step learning plan from beginner to advanced for any career role.",
+                roadmap_label: "Enter Career Role:",
+                roadmap_placeholder: "e.g., 'Software Engineer', 'Data Scientist'",
+                roadmap_button: "Generate Roadmap",
+                jobs_title: "Live Job Listings",
+                jobs_desc: "See real-time job and internship openings that match your skills.",
+                jobs_label: "Enter Target Role & Skills:",
+                jobs_placeholder: "e.g., 'Software Engineer, skills: Java, DSA, SQL'",
+                jobs_button: "Find Jobs",
+                checkin_title: "Daily Check-in & Motivation",
+                checkin_desc: "Share how your day was and get personal motivation and a motivation score from the AI.",
+                checkin_label: "How was your day today?",
+                checkin_placeholder: "e.g., 'Today was great, I learned about React hooks!' or 'Feeling a bit stuck with my project.'",
+                checkin_button: "Get Motivation",
+                assessment_title: "Career Assessment Test",
+                assessment_desc: "Take a conversational quiz to discover the best career paths based on your personality and interests.",
+                assessment_button: "Start Assessment",
+                interview_title: "AI Mock Interview",
+                interview_desc: "Practice for interviews in real-time and get instant feedback on your communication and answers.",
+                interview_label: "Enter Interview Role:",
+                interview_placeholder: "e.g., 'SDE Interview', 'Data Analyst Interview'",
+                interview_button: "Start Interview",
+                progress_title: "My Progress & Badges",
+                progress_desc: "Track your learning journey, unlock badges, and visualize your skill growth.",
+                progress_button: "View My Progress",
+                community_title: "Community Hub",
+                community_desc: "Ask career-related questions and get insightful answers from an AI mentor.",
+                community_label: "Ask a question:",
+                community_placeholder: "e.g., 'How do I prepare for system design interviews?'",
+                community_button: "Ask AI Mentor",
+                loading_text: "Analyzing...",
+                error_empty: "Input field cannot be empty. Please enter your details.",
+                error_api_key: "API Key is missing. Please paste your API key in the code.",
+                error_general: "Could not connect to the AI. Please try again later.",
+                error_mic: "Microphone access was denied. Please allow microphone access in your browser settings.",
+                output_header_career: "Your Personalized Career Plan",
+                output_header_resume: "Your Generated Resume & ATS Score",
+                output_header_roadmap: "Your Detailed Learning Roadmap",
+                output_header_jobs: "Matching Job Opportunities",
+                output_header_checkin: "Your Daily Motivation",
+                output_header_assessment: "Your Career Assessment Report",
+                output_header_community: "AI Mentor's Response",
+                download_roadmap: "Download Roadmap (PDF)",
+                ats_score_title: "Estimated ATS Score",
+                motivation_score_title: "Today's Motivation Score",
+                apply_now: "Apply Now",
+                listening_status_idle: "Click the mic to answer",
+                listening_status_active: "Listening...",
+                your_answer_title: "Your Answer",
+                end_interview_button: "End Interview",
+                end_assessment_button: "End Assessment",
+                next_question_button: "Next Question",
+                progress_header: "My Learning Progress",
+                no_roadmap_saved: "You haven't generated a detailed roadmap yet. Generate one to track your progress!",
+                badges_unlocked: "Badges Unlocked"
+            },
+            hi: {
+                title: "करियरकंपास एआई",
+                subtitle: "आपका व्यक्तिगत एआई-संचालित करियर टूलकिट।",
+                finder_title: "करियर पथ खोजक",
+                finder_desc: "अपने कौशल और रुचियों के आधार पर व्यक्तिगत करियर रोडमैप खोजें।",
+                finder_label: "अपना विवरण यहाँ दर्ज करें:",
+                finder_placeholder: "जैसे: 'बी.टेक सीएसई छात्र, जावा, पायथन में कौशल...'",
+                finder_button: "मेरा पथ बनाएं",
+                resume_title: "रिज्यूमे बिल्डर और स्कोरर",
+                resume_desc: "अपने विवरण पॉइंट्स में प्रदान करें, और एआई एक पेशेवर रिज्यूमे बनाएगा और उसे एटीएस स्कोर देगा।",
+                resume_label: "अपना विवरण यहाँ दर्ज करें:",
+                resume_placeholder: "जैसे: 'कौशल: पायथन, रिएक्ट। प्रोजेक्ट: एक ई-कॉमर्स साइट बनाई...'",
+                resume_button: "रिज्यूमे बनाएं और स्कोर करें",
+                roadmap_title: "विस्तृत रोडमैप जेनरेटर",
+                roadmap_desc: "किसी भी करियर भूमिका के लिए शुरुआती से उन्नत तक चरण-दर-चरण सीखने की योजना प्राप्त करें।",
+                roadmap_label: "करियर भूमिका दर्ज करें:",
+                roadmap_placeholder: "जैसे: 'सॉफ्टवेयर इंजीनियर', 'डेटा साइंटिस्ट'",
+                roadmap_button: "रोडमैप बनाएं",
+                jobs_title: "लाइव जॉब लिस्टिंग",
+                jobs_desc: "वास्तविक समय में नौकरी और इंटर्नशिप के अवसर देखें जो आपके कौशल से मेल खाते हैं।",
+                jobs_label: "लक्षित भूमिका और कौशल दर्ज करें:",
+                jobs_placeholder: "जैसे: 'सॉफ्टवेयर इंजीनियर, कौशल: जावा, डीएसए, एसक्यूएल'",
+                jobs_button: "नौकरियां खोजें",
+                checkin_title: "दैनिक चेक-इन और प्रेरणा",
+                checkin_desc: "बताएं आज का दिन कैसा था, और एआई से व्यक्तिगत प्रेरणा और एक प्रेरणा स्कोर पाएं।",
+                checkin_label: "आज का दिन कैसा था?",
+                checkin_placeholder: "जैसे: 'आज का दिन बढ़िया था, मैंने रिएक्ट हुक्स के बारे में सीखा!' या 'अपने प्रोजेक्ट में थोड़ा फंसा हुआ महसूस कर रही हूं।'",
+                checkin_button: "प्रेरणा प्राप्त करें",
+                assessment_title: "करियर मूल्यांकन परीक्षा",
+                assessment_desc: "अपने व्यक्तित्व और रुचियों के आधार पर सर्वोत्तम करियर पथ खोजने के लिए एक संवादी प्रश्नोत्तरी लें।",
+                assessment_button: "मूल्यांकन शुरू करें",
+                interview_title: "एआई मॉक इंटरव्यू",
+                interview_desc: "वास्तविक समय में साक्षात्कार का अभ्यास करें और अपने संचार और उत्तरों पर तत्काल प्रतिक्रिया प्राप्त करें।",
+                interview_label: "इंटरव्यू भूमिका दर्ज करें:",
+                interview_placeholder: "जैसे: 'एसडीई इंटरव्यू', 'डेटा एनालिस्ट इंटरव्यू'",
+                interview_button: "इंटरव्यू शुरू करें",
+                progress_title: "मेरी प्रगति और बैज",
+                progress_desc: "अपनी सीखने की यात्रा को ट्रैक करें, बैज अनलॉक करें, और अपने कौशल विकास को देखें।",
+                progress_button: "मेरी प्रगति देखें",
+                community_title: "कम्युनिटी हब",
+                community_desc: "करियर संबंधी प्रश्न पूछें और एआई मेंटर से व्यावहारिक उत्तर प्राप्त करें।",
+                community_label: "एक प्रश्न पूछें:",
+                community_placeholder: "जैसे: 'मैं सिस्टम डिज़ाइन इंटरव्यू की तैयारी कैसे करूँ?'",
+                community_button: "एआई मेंटर से पूछें",
+                loading_text: "विश्लेषण हो रहा है...",
+                error_empty: "इनपुट फ़ील्ड खाली नहीं हो सकता। कृपया अपना विवरण दर्ज करें।",
+                error_api_key: "API कुंजी नहीं मिली है। कृपया कोड में अपनी API कुंजी पेस्ट करें।",
+                error_general: "एआई से कनेक्ट नहीं हो सका। कृपया बाद में पुन: प्रयास करें।",
+                error_mic: "माइक्रोफ़ोन का एक्सेस अस्वीकार कर दिया गया था। कृपया अपनी ब्राउज़र सेटिंग्स में माइक्रोफ़ोन एक्सेस की अनुमति दें।",
+                output_header_career: "आपकी व्यक्तिगत करियर योजना",
+                output_header_resume: "आपका जेनरेट किया गया रिज्यूमे और एटीएस स्कोर",
+                output_header_roadmap: "आपकी विस्तृत सीखने की रोडमैप",
+                output_header_jobs: "मिलान वाले नौकरी के अवसर",
+                output_header_checkin: "आपकी आज की प्रेरणा",
+                output_header_assessment: "आपकी करियर मूल्यांकन रिपोर्ट",
+                output_header_community: "एआई मेंटर का जवाब",
+                download_roadmap: "रोडमैप डाउनलोड करें (PDF)",
+                ats_score_title: "अनुमानित एटीएस स्कोर",
+                motivation_score_title: "आज का प्रेरणा स्कोर",
+                apply_now: "अभी आवेदन करें",
+                listening_status_idle: "जवाब देने के लिए माइक पर क्लिक करें",
+                listening_status_active: "सुन रहा है...",
+                your_answer_title: "आपका जवाब",
+                end_interview_button: "इंटरव्यू समाप्त करें",
+                end_assessment_button: "मूल्यांकन समाप्त करें",
+                next_question_button: "अगला प्रश्न",
+                progress_header: "मेरी सीखने की प्रगति",
+                no_roadmap_saved: "आपने अभी तक कोई विस्तृत रोडमैप नहीं बनाया है। अपनी प्रगति को ट्रैक करने के लिए एक बनाएं!",
+                badges_unlocked: "अनलॉक किए गए बैज"
+            }
+        };
+
+        // --- UI ELEMENTS ---
+        const generateBtn = document.getElementById('generateBtn');
+        const generateResumeBtn = document.getElementById('generateResumeBtn');
+        const generateRoadmapBtn = document.getElementById('generateRoadmapBtn');
+        const findJobsBtn = document.getElementById('findJobsBtn');
+        const checkinBtn = document.getElementById('checkinBtn');
+        const startInterviewBtn = document.getElementById('startInterviewBtn');
+        const startAssessmentBtn = document.getElementById('startAssessmentBtn');
+        const progressBtn = document.getElementById('progressBtn');
+        const communityBtn = document.getElementById('communityBtn');
+        const userInput = document.getElementById('userInput');
+        const resumeInput = document.getElementById('resumeInput');
+        const roadmapInput = document.getElementById('roadmapInput');
+        const jobInput = document.getElementById('jobInput');
+        const checkinInput = document.getElementById('checkinInput');
+        const interviewInput = document.getElementById('interviewInput');
+        const communityInput = document.getElementById('communityInput');
+        const outputDiv = document.getElementById('output');
+        const loader = document.getElementById('loader');
+        const errorMessage = document.getElementById('errorMessage');
+        const languageSwitcher = document.getElementById('languageSwitcher');
+        const mainDashboard = document.getElementById('mainDashboard');
+        // Modals
+        const interviewUI = document.getElementById('interviewUI');
+        const assessmentUI = document.getElementById('assessmentUI');
+        const progressUI = document.getElementById('progressUI');
+        
+        let currentLanguage = 'en';
+        let interviewHistory = [];
+        let assessmentHistory = [];
+        let recognition;
+        const totalAssessmentQuestions = 5;
+
+        // --- LANGUAGE SWITCHER LOGIC ---
+        function setLanguage(lang) {
+            currentLanguage = lang;
+            document.querySelectorAll('[data-lang-key]').forEach(el => {
+                const key = el.getAttribute('data-lang-key');
+                if (el.tagName === 'TEXTAREA') {
+                    el.placeholder = translations[lang][key];
+                } else {
+                    el.textContent = translations[lang][key];
+                }
+            });
+        }
+        languageSwitcher.addEventListener('change', (e) => setLanguage(e.target.value));
+        
+        // --- MASTER PROMPTS ---
+        // All master prompts remain the same as previous version...
+        const getMasterPromptForCareer = (userText, lang) => {
+            const langInstruction = lang === 'hi' ? "Your entire response MUST be in Hindi." : "Your entire response MUST be in English.";
+            return `
+                You are an expert AI Career Counselor. ${langInstruction}
+                User's Profile: "${userText}"
+                Your Task: Generate a career plan using this exact format:
+                ### 1. [Career Path Title 1]
+                **Description:** [One-sentence description.]
+                **Next Steps:**
+                * **[Skill 1]:** [Brief explanation.]
+                * **[Skill 2]:** [Brief explanation.]
+                **Resource:**
+                [Resource Name](Resource URL)
+                ### 2. [Career Path Title 2]
+                **Description:** [One-sentence description.]
+                **Next Steps:**
+                * **[Skill 1]:** [Brief explanation.]
+                * **[Skill 2]:** [Brief explanation.]
+                **Resource:**
+                [Resource Name](Resource URL)
+                ### 3. [Career Path Title 3]
+                **Description:** [One-sentence description.]
+                **Next Steps:**
+                * **[Skill 1]:** [Brief explanation.]
+                * **[Skill 2]:** [Brief explanation.]
+                **Resource:**
+                [Resource Name](Resource URL)
+                ### Interview Ki Tayyari
+                **Sample Question ([Role Name]):** [Sample interview question.]
+            `;
+        };
+
+        const getMasterPromptForResume = (userText, lang) => {
+            const langInstruction = lang === 'hi' ? "The entire response MUST be in Hinglish (Hindi words with English script)." : "The entire response MUST be in English.";
+            return `
+                You are an expert ATS-friendly resume writer and analyzer. ${langInstruction}
+                User's details: "${userText}"
+                Your Task:
+                1. First, generate a professional, ATS-friendly resume draft based on the user's details. Use clear headings like 'Summary', 'Skills', 'Projects', 'Experience', 'Education'.
+                2. After the resume draft, create a clear separation using '---ATS SCORE---'.
+                3. After the separation, provide an estimated ATS score for the generated resume on a scale of 0 to 100.
+                4. Provide a short, bulleted list explaining the score, covering what's good and what can be improved.
+                Example Output Structure:
+                [Full Resume Draft Text Here]
+                ---ATS SCORE---
+                SCORE: 85/100
+                * **Strengths:** Good use of action verbs and keywords.
+                * **Improvements:** Add more quantifiable results to project descriptions.
+            `;
+        };
+
+        const getMasterPromptForDetailedRoadmap = (careerTitle, lang) => {
+            const langInstruction = lang === 'hi' ? "The entire roadmap MUST be in Hindi." : "The entire response MUST be in English.";
+            return `
+                You are an expert career mentor and curriculum designer. ${langInstruction}
+                The user wants a detailed, step-by-step roadmap for the career of a "${careerTitle}".
+                Your Task: Create a comprehensive learning plan from absolute beginner to advanced.
+                1.  Break down the career into its main pillars (e.g., for Software Engineer, pillars are DSA, Web Development, System Design, etc.).
+                2.  For each pillar, create a step-by-step learning path.
+                3.  Start with the absolute basics (e.g., "Start with C++ or Java for DSA").
+                4.  List topics in a logical order (e.g., for DSA: Arrays, Strings, Sorting, Recursion, Trees, Graphs).
+                5.  Be very specific and actionable.
+                Your output must be structured with clear headings and nested lists. Use Markdown for formatting.
+                Example for one pillar:
+                ### Pillar 1: Data Structures & Algorithms (DSA)
+                * **Step 1: Choose a Language**
+                    * Recommended: C++ (for speed) or Java (for OOP concepts).
+                * **Step 2: Learn the Basics**
+                    * Arrays & Strings
+                    * Sorting Algorithms (Bubble, Selection, Insertion)
+                    * Recursion
+                * **Step 3: Intermediate Topics**
+                    * ... and so on.
+            `;
+        };
+
+        const getMasterPromptForJobs = (userText, lang) => {
+            const langInstruction = lang === 'hi' ? "The entire response MUST be in Hindi." : "The entire response MUST be in English.";
+            return `
+                You are an AI Job Search Assistant. ${langInstruction}
+                User's target role and skills: "${userText}"
+                Your Task: Generate a list of 4 realistic, sample job listings that match the user's input.
+                Use a mix of real and plausible fictional company names. Locations should be major Indian cities.
+                For each job, you MUST provide:
+                - Job Title
+                - Company
+                - Location
+                - Estimated Salary (in LPA)
+                - A short, 2-3 sentence description of the role.
+                - The platform where it was found (e.g., "Found on LinkedIn").
+                - A plausible fictional recruiter's name (e.g., "Posted by Priya Sharma").
+                You MUST format the response using this exact structure:
+                ### [Job Title 1] at [Company 1]
+                **Location:** [Location 1]
+                **Salary:** [Estimated Salary 1]
+                **Platform:** [Platform 1]
+                **Recruiter:** [Recruiter Name 1]
+                [Job Description 1]
+
+                ### [Job Title 2] at [Company 2]
+                **Location:** [Location 2]
+                **Salary:** [Estimated Salary 2]
+                **Platform:** [Platform 2]
+                **Recruiter:** [Recruiter Name 2]
+                [Job Description 2]
+
+                ### [Job Title 3] at [Company 3]
+                **Location:** [Location 3]
+                **Salary:** [Estimated Salary 3]
+                **Platform:** [Platform 3]
+                **Recruiter:** [Recruiter Name 3]
+                [Job Description 3]
+                
+                ### [Job Title 4] at [Company 4]
+                **Location:** [Location 4]
+                **Salary:** [Estimated Salary 4]
+                **Platform:** [Platform 4]
+                **Recruiter:** [Recruiter Name 4]
+                [Job Description 4]
+            `;
+        };
+
+        const getMasterPromptForCheckin = (userText, lang) => {
+            const langInstruction = lang === 'hi' ? "The entire response MUST be in Hinglish (Hindi words with English script)." : "The entire response MUST be in English.";
+            return `
+                You are Shreya, an empathetic and motivational AI friend. ${langInstruction}
+                The user is checking in about their day. Their message is: "${userText}"
+                Your Task:
+                1.  Read the user's message and understand their emotional state (e.g., happy, frustrated, tired, excited).
+                2.  Write a short, personal, and encouraging response. If they are happy, celebrate with them. If they are struggling, offer support and perspective.
+                3.  After your message, create a clear separation using '---SCORE---'.
+                4.  After the separation, provide a 'Motivation Score' between 1 and 10, based on their message. A happy, productive day gets a high score (8-10). A frustrating or sad day gets a lower score (1-4). A neutral day gets a medium score (5-7).
+                Example Output Structure:
+                [Your personal, motivational message here.]
+                ---SCORE---
+                7
+            `;
+        };
+
+        const getMasterPromptForInterview = (history, lang) => {
+            const langInstruction = lang === 'hi' ? "Your entire response, including questions, feedback, and greetings, MUST be in Hindi." : "Your entire response, including questions, feedback, and greetings, MUST be in English.";
+            const historyString = history.map(turn => `${turn.role}: ${turn.text}`).join('\n');
+            return `
+                You are Shreya, a friendly but professional AI interviewer. ${langInstruction}
+                Your task is to conduct a job interview.
+                - If the conversation history is empty, start by introducing yourself and asking the first question.
+                - If the user has answered, first provide brief, constructive feedback on their previous answer.
+                - Then, ask the next relevant question.
+                - Keep the conversation flowing naturally. Ask a mix of behavioral and technical questions.
+                - After 4-5 questions, conclude the interview and provide a summary feedback.
+                - Your response should ONLY be your spoken part. Do not add any extra text.
+
+                Conversation History:
+                ${historyString}
+            `;
+        };
+
+        const getMasterPromptForAssessment = (history, lang) => {
+            const langInstruction = lang === 'hi' ? "Your entire response MUST be in Hindi." : "Your entire response MUST be in English.";
+            const historyString = history.map(turn => `Q: ${turn.question}\nA: ${turn.answer}`).join('\n\n');
+            const questionCount = history.length;
+
+            if (questionCount >= totalAssessmentQuestions) {
+                return `You are Shreya, an expert career counselor. ${langInstruction} The user has completed the assessment. Analyze all their answers below and provide a detailed report with the top 3 recommended career paths. For each path, explain in detail WHY it's a good fit based on their specific answers. Start the response with '---REPORT---' followed by the detailed report.
+                
+                Assessment Answers:
+                ${historyString}`;
+            }
+
+            return `You are Shreya, an expert career counselor continuing an assessment. ${langInstruction} Here is the conversation so far:
+            ${historyString}
+            
+            Based on the user's previous answers, ask the next logical and insightful question to better understand their personality, interests, or work style. Do NOT repeat questions. Your response should ONLY be the next question.`;
+        };
+        
+        const getMasterPromptForCommunity = (userText, lang) => {
+            const langInstruction = lang === 'hi' ? "The entire response MUST be in Hinglish (Hindi words with English script)." : "The entire response MUST be in English.";
+            return `
+                You are an experienced and helpful AI Mentor. ${langInstruction}
+                A student has asked the following career-related question: "${userText}"
+                Your Task: Provide a clear, insightful, and encouraging answer. Break down complex topics into simple steps. Behave like a real, supportive mentor. Structure your response well with paragraphs and bullet points if needed.
+            `;
+        };
+
+        // --- HTML FORMATTING ---
+        // All formatters remain the same as previous version...
+        const formatCareerResponseToHTML = (text) => {
+            let html = `<div class="glass-effect rounded-2xl p-6 md:p-8 shadow-2xl animate-fade-in">`;
+            html += `<h2 class="text-2xl md:text-3xl font-bold text-white mb-6 border-b-2 border-indigo-500 pb-3">${translations[currentLanguage].output_header_career}</h2>`;
+            const sections = text.split('### ').slice(1);
+            const colors = ['indigo', 'green', 'amber'];
+            sections.forEach((section, index) => {
+                if (index < 3) {
+                    const lines = section.trim().split('\n');
+                    const title = lines[0];
+                    const description = lines[1].replace('**Description:** ', '');
+                    const resourceLine = lines.find(line => line.startsWith('['));
+                    html += `<div class="mb-8"><div class="flex justify-between items-center"><h3 class="text-xl font-semibold text-${colors[index]}-400 mb-2">${title}</h3><button class="download-roadmap-btn bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-lg text-sm" data-career-title="${title}"><i class="fas fa-download mr-2"></i><span data-lang-key="download_roadmap">${translations[currentLanguage].download_roadmap}</span></button></div><p class="text-gray-300 mb-4">${description}</p><div class="bg-gray-900/50 rounded-lg p-4"><h4 class="font-semibold text-white mb-2">Next Steps:</h4><ul class="list-disc list-inside text-gray-300 space-y-2">`;
+                    lines.filter(line => line.startsWith('* ')).forEach(step => {
+                        const formattedStep = step.replace('* **', `<li><strong class="text-${colors[index]}-400">`).replace(':**', ':</strong>');
+                        html += `${formattedStep}</li>`;
+                    });
+                    html += `</ul><h4 class="font-semibold text-white mt-4 mb-2">Resource:</h4>`;
+                    if(resourceLine){
+                        const resourceMatch = resourceLine.match(/\[(.*?)\]\((.*?)\)/);
+                        if (resourceMatch) html += `<a href="${resourceMatch[2]}" target="_blank" rel="noopener noreferrer" class="text-blue-400 hover:underline">${resourceMatch[1]}</a>`;
+                    }
+                    html += `</div></div>`;
+                } else {
+                    const lines = section.trim().split('\n');
+                    const title = lines[0];
+                    const question = lines[1].replace('**Sample Question', '**Sample Question');
+                    html += `<div><h3 class="text-xl font-semibold text-rose-400 mb-2">${title}</h3><div class="bg-gray-900/50 rounded-lg p-4"><p class="text-gray-300">${question.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')}</p></div></div>`;
+                }
+            });
+            html += '</div>';
+            return html;
+        };
+
+        const formatResumeResponseToHTML = (text) => {
+            const parts = text.split('---ATS SCORE---');
+            const resumeDraft = parts[0].trim();
+            const scoreAnalysis = parts.length > 1 ? parts[1].trim() : "Score analysis not available.";
+
+            const scoreMatch = scoreAnalysis.match(/SCORE: (\d+\/\d+)/);
+            const scoreValue = scoreMatch ? scoreMatch[1] : "N/A";
+            const scoreExplanation = scoreAnalysis.replace(/SCORE: .*\n?/, '').replace(/\* \*\*(.*?)\*\*:/g, '<br>• <strong>$1:</strong>').replace(/\*/g, '<br>•');
+
+            let html = `<div class="glass-effect rounded-2xl p-6 md:p-8 shadow-2xl animate-fade-in">`;
+            html += `<h2 class="text-2xl md:text-3xl font-bold text-white mb-6 border-b-2 border-green-500 pb-3">${translations[currentLanguage].output_header_resume}</h2>`;
+            
+            html += `<div class="bg-gray-900/50 rounded-lg p-6 mb-8 text-center"><h3 class="text-lg font-semibold text-green-400 mb-2" data-lang-key="ats_score_title">${translations[currentLanguage].ats_score_title}</h3><p class="text-5xl font-bold text-white">${scoreValue}</p><div class="text-left mt-4 text-gray-300">${scoreExplanation}</div></div>`;
+            
+            html += `<h3 class="text-xl font-semibold text-white mb-4">Resume Draft:</h3>`;
+            html += `<pre class="whitespace-pre-wrap text-gray-300 font-sans bg-gray-900/50 p-4 rounded-lg">${resumeDraft}</pre>`;
+            html += `</div>`;
+            return html;
+        };
+        
+        const formatRoadmapResponseToHTML = (text) => {
+            // Save roadmap to local storage
+            const roadmapTitle = roadmapInput.value;
+            const topics = text.match(/\* (.*)/g).map(item => item.substring(2));
+            saveRoadmap(roadmapTitle, topics);
+
+            let html = text
+                .replace(/### (.*)/g, '<h3 class="text-xl font-semibold text-blue-300 mt-6 mb-3">$1</h3>')
+                .replace(/\* \*\*(.*?)\*\*:/g, '<h4 class="text-lg font-semibold text-white mt-4 mb-2">$1</h4>')
+                .replace(/\* (.*)/g, '<li class="ml-5 list-disc">$1</li>')
+                .replace(/\n/g, '<br>');
+
+            return `<div class="glass-effect rounded-2xl p-6 md:p-8 shadow-2xl animate-fade-in">
+                        <h2 class="text-2xl md:text-3xl font-bold text-white mb-6 border-b-2 border-blue-500 pb-3">${translations[currentLanguage].output_header_roadmap}</h2>
+                        <div class="text-gray-300">${html}</div>
+                    </div>`;
+        };
+
+        const formatJobsResponseToHTML = (text) => {
+            let html = `<div class="glass-effect rounded-2xl p-6 md:p-8 shadow-2xl animate-fade-in">`;
+            html += `<h2 class="text-2xl md:text-3xl font-bold text-white mb-6 border-b-2 border-cyan-500 pb-3">${translations[currentLanguage].output_header_jobs}</h2>`;
+            const jobs = text.split('### ').slice(1);
+            jobs.forEach(job => {
+                const lines = job.trim().split('\n');
+                const titleLine = lines[0];
+                const jobTitle = titleLine.split(' at ')[0];
+                const company = titleLine.split(' at ')[1];
+                const location = lines[1].replace('**Location:** ', '');
+                const salary = lines[2].replace('**Salary:** ', '');
+                const platform = lines[3].replace('**Platform:** ', '');
+                const recruiter = lines[4].replace('**Recruiter:** ', '');
+                const description = lines.slice(5).join(' ');
+                const applyLink = `https://www.linkedin.com/jobs/search/?keywords=${encodeURIComponent(jobTitle + ' ' + company)}`;
+
+                html += `<div class="bg-gray-900/50 rounded-lg p-4 mb-4">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <h3 class="text-lg font-semibold text-cyan-300">${titleLine}</h3>
+                                    <div class="flex flex-wrap items-center text-sm text-gray-400 mt-1">
+                                        <span class="mr-4"><i class="fas fa-map-marker-alt mr-1"></i> ${location}</span>
+                                        <span class="mr-4"><i class="fas fa-money-bill-wave mr-1"></i> ${salary}</span>
+                                        <span class="mr-4"><i class="fab fa-linkedin mr-1"></i> ${platform}</span>
+                                        <span><i class="fas fa-user-tie mr-1"></i> ${recruiter}</span>
+                                    </div>
+                                </div>
+                                <a href="${applyLink}" target="_blank" class="bg-cyan-600 hover:bg-cyan-700 text-white font-bold py-2 px-4 rounded-lg text-sm whitespace-nowrap" data-lang-key="apply_now">${translations[currentLanguage].apply_now}</a>
+                            </div>
+                            <p class="text-gray-300 mt-2">${description}</p>
+                         </div>`;
+            });
+            html += '</div>';
+            return html;
+        };
+
+        const formatCheckinResponseToHTML = (text) => {
+            const parts = text.split('---SCORE---');
+            const message = parts[0].trim();
+            const score = parts.length > 1 ? parseInt(parts[1].trim(), 10) : 5;
+            const rotation = (score / 10) * 180; // Map 0-10 scale to 0-180 degrees
+
+            let html = `<div class="glass-effect rounded-2xl p-6 md:p-8 shadow-2xl animate-fade-in">`;
+            html += `<h2 class="text-2xl md:text-3xl font-bold text-white mb-6 border-b-2 border-yellow-500 pb-3">${translations[currentLanguage].output_header_checkin}</h2>`;
+            
+            html += `<div class="flex flex-col md:flex-row items-center gap-8">`;
+            // Motivation Message
+            html += `<div class="flex-1 bg-gray-900/50 p-4 rounded-lg"><p class="text-lg text-gray-300 italic">"${message}"</p><p class="text-right mt-2 text-yellow-400">- Shreya</p></div>`;
+            // Motivation Gauge
+            html += `<div class="flex flex-col items-center"><h3 class="text-lg font-semibold text-yellow-400 mb-2" data-lang-key="motivation_score_title">${translations[currentLanguage].motivation_score_title}</h3><div class="gauge-container"><div class="gauge-background"></div><div class="gauge-fill" style="transform: rotate(${rotation}deg);"></div></div><p class="text-4xl font-bold text-white mt-[-50px]">${score}/10</p></div>`;
+            html += `</div></div>`;
+            return html;
+        };
+
+        const formatAssessmentResponseToHTML = (text) => {
+            let report = text.replace('---REPORT---', '').trim();
+            let html = report
+                .replace(/### (.*)/g, '<h3 class="text-xl font-semibold text-purple-300 mt-6 mb-3">$1</h3>')
+                .replace(/\*\*(.*?)\*\*:/g, '<h4 class="text-lg font-semibold text-white mt-4 mb-2">$1</h4>')
+                .replace(/\* (.*)/g, '<li class="ml-5 list-disc">$1</li>')
+                .replace(/\n/g, '<br>');
+
+            return `<div class="glass-effect rounded-2xl p-6 md:p-8 shadow-2xl animate-fade-in">
+                        <h2 class="text-2xl md:text-3xl font-bold text-white mb-6 border-b-2 border-purple-500 pb-3">${translations[currentLanguage].output_header_assessment}</h2>
+                        <div class="text-gray-300">${html}</div>
+                    </div>`;
+        };
+
+        const formatCommunityResponseToHTML = (text) => {
+            let html = text
+                .replace(/### (.*)/g, '<h3 class="text-xl font-semibold text-rose-300 mt-6 mb-3">$1</h3>')
+                .replace(/\*\*(.*?)\*\*:/g, '<h4 class="text-lg font-semibold text-white mt-4 mb-2">$1</h4>')
+                .replace(/\* (.*)/g, '<li class="ml-5 list-disc">$1</li>')
+                .replace(/\n/g, '<br>');
+
+            return `<div class="glass-effect rounded-2xl p-6 md:p-8 shadow-2xl animate-fade-in mt-6">
+                        <h2 class="text-2xl md:text-3xl font-bold text-white mb-6 border-b-2 border-rose-500 pb-3">${translations[currentLanguage].output_header_community}</h2>
+                        <div class="text-gray-300">${html}</div>
+                    </div>`;
+        };
+
+        // --- API CALL ---
+        async function callGeminiAPI(prompt) {
+             const functionUrl = '/.netlify/functions/gemini'; 
+             try {
+                 const response = await fetch(functionUrl, {
+                     method: 'POST',
+                     body: JSON.stringify({ prompt })
+                 });
+                 if (!response.ok) {
+                     const errorBody = await response.json();
+                     throw new Error(errorBody.error || `Function error! status: ${response.status}`);
+                 }
+                 const result = await response.json();
+                 if (result.text) return result.text;
+                 throw new Error("Invalid response from function.");
+             } catch (error) {
+                 console.error("API Call Error:", error);
+                 throw error;
+             }
+        }
+
+        // --- UI HELPER FUNCTIONS ---
+        function showLoader(isLoading) {
+            loader.classList.toggle('hidden', !isLoading);
+        }
+
+        function showError(message) {
+            errorMessage.innerHTML = `<strong class="font-bold">Oops! </strong><span class="block sm:inline">${message}</span>`;
+            errorMessage.classList.remove('hidden');
+        }
+
+        function displayOutput(html) {
+            outputDiv.innerHTML = html;
+            outputDiv.classList.remove('hidden');
+            outputDiv.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function resetUI() {
+            outputDiv.classList.add('hidden');
+            errorMessage.classList.add('hidden');
+        }
+        
+        // --- PDF GENERATION ---
+        async function generateAndDownloadPDF(careerTitle) {
+            const button = document.querySelector(`[data-career-title="${careerTitle}"]`);
+            button.disabled = true;
+            button.innerHTML = `<i class="fas fa-spinner fa-spin mr-2"></i>Generating...`;
+
+            try {
+                const prompt = getMasterPromptForRoadmapPDF(careerTitle, currentLanguage);
+                const roadmapText = await callGeminiAPI(prompt);
+                
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
+                
+                const margin = 10;
+                const pageWidth = doc.internal.pageSize.getWidth();
+                const textWidth = pageWidth - margin * 2;
+
+                doc.setFontSize(18);
+                doc.text(`Career Roadmap: ${careerTitle}`, margin, margin + 10);
+                
+                doc.setFontSize(12);
+                const splitText = doc.splitTextToSize(roadmapText, textWidth);
+                doc.text(splitText, margin, margin + 25);
+                
+                doc.save(`${careerTitle.replace(/ /g, '_')}_Roadmap.pdf`);
+
+            } catch (error) {
+                console.error("PDF Generation Error:", error);
+                showError("Could not generate the PDF roadmap. Please try again.");
+            } finally {
+                button.disabled = false;
+                button.innerHTML = `<i class="fas fa-download mr-2"></i><span data-lang-key="download_roadmap">${translations[currentLanguage].download_roadmap}</span>`;
+            }
+        }
+
+        // --- INTERVIEW LOGIC ---
+        function speak(text) {
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = currentLanguage === 'hi' ? 'hi-IN' : 'en-US';
+            utterance.onstart = () => aiAvatar.classList.add('avatar-speaking');
+            utterance.onend = () => aiAvatar.classList.remove('avatar-speaking');
+            speechSynthesis.speak(utterance);
+        }
+
+        async function handleInterviewTurn(userAnswer = "") {
+            if (userAnswer) {
+                interviewHistory.push({ role: 'user', text: userAnswer });
+            }
+            const prompt = getMasterPromptForInterview(interviewHistory, currentLanguage);
+            
+            try {
+                const aiResponse = await callGeminiAPI(prompt);
+                interviewHistory.push({ role: 'ai', text: aiResponse });
+                aiSpeechText.textContent = aiResponse;
+                speak(aiResponse);
+            } catch (error) {
+                const errorKey = error.message.includes("API Key Missing") ? 'error_api_key' : 'error_general';
+                showError(translations[currentLanguage][errorKey]);
+                endInterview();
+            }
+        }
+
+        async function startInterview() {
+            const role = interviewInput.value;
+            if (role.trim() === "") {
+                showError(translations[currentLanguage].error_empty);
+                return;
+            }
+            // Ask for microphone permission
+            try {
+                await navigator.mediaDevices.getUserMedia({ audio: true });
+                // Permission granted
+                interviewHistory = [{ role: 'user', text: `Start the interview for the role: ${role}` }];
+                mainDashboard.classList.add('hidden');
+                interviewUI.classList.remove('hidden');
+                interviewRoleTitle.textContent = `${role}`;
+                userAnswerText.textContent = "";
+                handleInterviewTurn();
+            } catch (err) {
+                // Permission denied
+                console.error("Microphone permission denied:", err);
+                alert(translations[currentLanguage].error_mic);
+            }
+        }
+
+        function endInterview() {
+            if (recognition) recognition.stop();
+            speechSynthesis.cancel();
+            mainDashboard.classList.remove('hidden');
+            interviewUI.classList.add('hidden');
+            interviewHistory = [];
+        }
+
+        function startListening() {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (!SpeechRecognition) {
+                alert("Sorry, your browser doesn't support speech recognition.");
+                return;
+            }
+            recognition = new SpeechRecognition();
+            recognition.lang = currentLanguage === 'hi' ? 'hi-IN' : 'en-US';
+            recognition.interimResults = true;
+
+            recognition.onstart = () => {
+                answerBtn.classList.add('pulsing-mic');
+                listeningStatus.textContent = translations[currentLanguage].listening_status_active;
+            };
+
+            recognition.onresult = (event) => {
+                const transcript = Array.from(event.results)
+                    .map(result => result[0])
+                    .map(result => result.transcript)
+                    .join('');
+                userAnswerText.textContent = transcript;
+            };
+
+            recognition.onend = () => {
+                answerBtn.classList.remove('pulsing-mic');
+                listeningStatus.textContent = translations[currentLanguage].listening_status_idle;
+                if (userAnswerText.textContent) {
+                    handleInterviewTurn(userAnswerText.textContent);
+                }
+            };
+            
+            recognition.start();
+        }
+
+        // --- ASSESSMENT LOGIC ---
+        async function handleAssessmentTurn() {
+            const userAnswer = assessmentAnswer.value;
+            if (userAnswer.trim() === "" && assessmentHistory.length > 0) {
+                showError(translations[currentLanguage].error_empty);
+                return;
+            }
+            
+            const lastQuestion = assessmentQuestion.textContent;
+            if(userAnswer) {
+                assessmentHistory.push({ question: lastQuestion, answer: userAnswer });
+            }
+
+            assessmentAnswer.value = "";
+            const progress = (assessmentHistory.length / totalAssessmentQuestions) * 100;
+            assessmentProgressBar.style.width = `${progress}%`;
+            
+            nextQuestionBtn.disabled = true;
+            
+            try {
+                const prompt = getMasterPromptForAssessment(assessmentHistory, currentLanguage);
+                const response = await callGeminiAPI(prompt);
+
+                if (response.startsWith('---REPORT---')) {
+                    const reportHTML = formatAssessmentResponseToHTML(response);
+                    endAssessment();
+                    displayOutput(reportHTML);
+                } else {
+                    assessmentQuestion.textContent = response;
+                }
+            } catch (error) {
+                const errorKey = error.message.includes("API Key Missing") ? 'error_api_key' : 'error_general';
+                showError(translations[currentLanguage][errorKey]);
+                endAssessment();
+            } finally {
+                nextQuestionBtn.disabled = false;
+            }
+        }
+
+        function startAssessment() {
+            assessmentHistory = [];
+            mainDashboard.classList.add('hidden');
+            assessmentUI.classList.remove('hidden');
+            assessmentAnswer.value = "";
+            assessmentProgressBar.style.width = '0%';
+            handleAssessmentTurn(); // This will call with empty history to get the first question
+        }
+
+        function endAssessment() {
+            mainDashboard.classList.remove('hidden');
+            assessmentUI.classList.add('hidden');
+            assessmentHistory = [];
+        }
+
+        // --- PROGRESS & GAMIFICATION LOGIC ---
+        function getRoadmaps() {
+            return JSON.parse(localStorage.getItem('careerCompassRoadmaps')) || {};
+        }
+
+        function saveRoadmap(title, topics) {
+            const roadmaps = getRoadmaps();
+            roadmaps[title] = {
+                title: title,
+                topics: topics.map(t => ({ text: t, completed: false }))
+            };
+            localStorage.setItem('careerCompassRoadmaps', JSON.stringify(roadmaps));
+        }
+
+        function updateProgress(roadmapTitle, topicIndex, isChecked) {
+            const roadmaps = getRoadmaps();
+            if (roadmaps[roadmapTitle] && roadmaps[roadmapTitle].topics[topicIndex]) {
+                roadmaps[roadmapTitle].topics[topicIndex].completed = isChecked;
+                localStorage.setItem('careerCompassRoadmaps', JSON.stringify(roadmaps));
+                showProgress(); // Re-render the progress UI
+            }
+        }
+
+        function showProgress() {
+            const roadmaps = getRoadmaps();
+            const progressContent = document.getElementById('progressContent');
+            progressUI.classList.remove('hidden');
+            mainDashboard.classList.add('hidden');
+
+            if (Object.keys(roadmaps).length === 0) {
+                progressContent.innerHTML = `<p class="text-center text-gray-400">${translations[currentLanguage].no_roadmap_saved}</p>`;
+                return;
+            }
+
+            let html = '';
+            for (const title in roadmaps) {
+                const roadmap = roadmaps[title];
+                const completedTopics = roadmap.topics.filter(t => t.completed).length;
+                const totalTopics = roadmap.topics.length;
+                const percentage = totalTopics > 0 ? Math.round((completedTopics / totalTopics) * 100) : 0;
+
+                html += `<div class="mb-8">
+                            <h3 class="text-2xl font-bold text-orange-300 mb-3">${roadmap.title}</h3>
+                            <div class="w-full bg-gray-700 rounded-full h-4 mb-2">
+                                <div class="bg-orange-500 h-4 rounded-full" style="width: ${percentage}%"></div>
+                            </div>
+                            <p class="text-right text-sm font-semibold">${percentage}% Complete</p>
+                            <div class="mt-4 max-h-60 overflow-y-auto pr-2">`;
+                
+                roadmap.topics.forEach((topic, index) => {
+                    html += `<div class="flex items-center mb-2">
+                                <input type="checkbox" id="topic-${title}-${index}" data-roadmap="${title}" data-index="${index}" ${topic.completed ? 'checked' : ''} class="w-4 h-4 text-orange-600 bg-gray-700 border-gray-600 rounded focus:ring-orange-500">
+                                <label for="topic-${title}-${index}" class="ml-3 text-gray-300 ${topic.completed ? 'line-through text-gray-500' : ''}">${topic.text}</label>
+                             </div>`;
+                });
+
+                html += `</div>`;
+
+                // Badges
+                html += `<div class="mt-4"><h4 class="text-lg font-semibold text-white mb-2" data-lang-key="badges_unlocked">${translations[currentLanguage].badges_unlocked}</h4><div class="flex gap-4">`;
+                if (percentage >= 25) html += `<span class="text-2xl" title="25% Complete">🥉</span>`;
+                if (percentage >= 50) html += `<span class="text-2xl" title="50% Complete">🥈</span>`;
+                if (percentage >= 75) html += `<span class="text-2xl" title="75% Complete">🥇</span>`;
+                if (percentage === 100) html += `<span class="text-2xl" title="100% Complete">🏆</span>`;
+                html += `</div></div></div>`;
+            }
+            progressContent.innerHTML = html;
+
+            // Add event listeners to new checkboxes
+            progressContent.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+                checkbox.addEventListener('change', (e) => {
+                    updateProgress(e.target.dataset.roadmap, e.target.dataset.index, e.target.checked);
+                });
+            });
+        }
+
+
+        // --- EVENT LISTENERS ---
+        async function handleGeneration(button, inputElement, getPrompt, formatHTML) {
+            const text = inputElement.value;
+            if (text.trim() === "") {
+                showError(translations[currentLanguage].error_empty);
+                return;
+            }
+            resetUI();
+            showLoader(true);
+            button.disabled = true;
+            const originalButtonText = button.querySelector('span').textContent;
+            button.querySelector('span').textContent = translations[currentLanguage].loading_text;
+
+            try {
+                const masterPrompt = getPrompt(text, currentLanguage);
+                const aiResponseText = await callGeminiAPI(masterPrompt);
+                const formattedHTML = formatHTML(aiResponseText);
+                displayOutput(formattedHTML);
+            } catch (error) {
+                console.error("API Call Error:", error);
+                const errorKey = error.message.includes("API Key Missing") ? 'error_api_key' : 'error_general';
+                showError(translations[currentLanguage][errorKey]);
+            } finally {
+                showLoader(false);
+                button.disabled = false;
+                button.querySelector('span').textContent = originalButtonText;
+            }
+        }
+
+        generateBtn.addEventListener('click', () => handleGeneration(generateBtn, userInput, getMasterPromptForCareer, formatCareerResponseToHTML));
+        generateResumeBtn.addEventListener('click', () => handleGeneration(generateResumeBtn, resumeInput, getMasterPromptForResume, formatResumeResponseToHTML));
+        generateRoadmapBtn.addEventListener('click', () => handleGeneration(generateRoadmapBtn, roadmapInput, getMasterPromptForDetailedRoadmap, formatRoadmapResponseToHTML));
+        findJobsBtn.addEventListener('click', () => handleGeneration(findJobsBtn, jobInput, getMasterPromptForJobs, formatJobsResponseToHTML));
+        checkinBtn.addEventListener('click', () => handleGeneration(checkinBtn, checkinInput, getMasterPromptForCheckin, formatCheckinResponseToHTML));
+        startInterviewBtn.addEventListener('click', startInterview);
+        startAssessmentBtn.addEventListener('click', startAssessment);
+        communityBtn.addEventListener('click', () => handleGeneration(communityBtn, communityInput, getMasterPromptForCommunity, formatCommunityResponseToHTML));
+        progressBtn.addEventListener('click', showProgress);
+        
+        outputDiv.addEventListener('click', function(event) {
+            const target = event.target.closest('.download-roadmap-btn');
+            if (target) {
+                const careerTitle = target.dataset.careerTitle;
+                generateAndDownloadPDF(careerTitle);
+            }
+        });
+        
+        // --- INITIALIZATION ---
+        document.addEventListener('DOMContentLoaded', () => {
+            // Get references to modal elements and attach listeners
+            const endInterviewBtn = document.getElementById('endInterviewBtn');
+            const answerBtn = document.getElementById('answerBtn');
+            const nextQuestionBtn = document.getElementById('nextQuestionBtn');
+            const endAssessmentBtn = document.getElementById('endAssessmentBtn');
+            const closeProgressBtn = document.getElementById('closeProgressBtn');
+
+            if(endInterviewBtn) endInterviewBtn.addEventListener('click', endInterview);
+            if(answerBtn) answerBtn.addEventListener('click', startListening);
+            if(nextQuestionBtn) nextQuestionBtn.addEventListener('click', handleAssessmentTurn);
+            if(endAssessmentBtn) endAssessmentBtn.addEventListener('click', endAssessment);
+            if(closeProgressBtn) closeProgressBtn.addEventListener('click', () => {
+                progressUI.classList.add('hidden');
+                mainDashboard.classList.remove('hidden');
+            });
+        });
+        
+        setLanguage(currentLanguage); // Set initial language on page load
+        const style = document.createElement('style');
+        style.innerHTML = `@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } } .animate-fade-in { animation: fadeIn 0.5s ease-out forwards; }`;
+        document.head.appendChild(style);
+    </script>
+
+</body>
+</html>
